@@ -1,85 +1,68 @@
-import React from 'react';
-import styles from './ScoreBoard.module.css';
+import React from "react";
 
 
-/*  ScoreBoard receives all the props from Board, the ones that will be using in this component */
-const ScoreBoard = ({ whiteCount, blackCount, turn, boardSize, setMatriz, setWhiteCount,
-  setBlackCount, setTurn, setEndGame, baseMatriz, baseMatriz10x10, handleBoardSize,
-  setAllowDiagonal, allowDiagonal,
-}) => {
-
-  /* Resets the game with the initial values based on the board size*/
-  const newGame = () => {
-    const initialMatriz =
-      boardSize === 8 ? baseMatriz() : baseMatriz10x10();
-    setMatriz(initialMatriz);
-    setWhiteCount(boardSize === 8 ? 30 : 48);
-    setBlackCount(boardSize === 8 ? 30 : 48);
-    setTurn(true);
-    setEndGame(false);
-  };
-
-  /* Enables or disables diagonal moves and restarts the game to apply the change */
-  const changeDiagonalMoves = () => {
-    setAllowDiagonal(!allowDiagonal);
-    newGame();
-  };
-
+export default function ScoreBoard({
+  whiteCount,
+  blackCount,
+  turn,
+  boardSize,
+  baseMatriz,
+  setMatriz,
+  setWhiteCount,
+  setBlackCount,
+  setTurn,
+  baseMatriz10x10,
+  handleBoardSize,
+  setAllowDiagonal,
+  allowDiagonal,
+  setEndGame
+}) {
   return (
-    <div className={styles.container}>
-      <div className={styles.scoreBoard}>
-        <h1 className={styles.title}>Othello</h1>
-        <h1 className={styles.title}>by Angela</h1>
-        <div className={styles.tokenWrapper}>
-          <div className={`${styles.whiteToken} mr-6`}></div>
-          {/* here passing the white and blackCount  */}
-          <p className={`${styles.scoreText} mr-6`}>{whiteCount}</p>
-          <div className={`${styles.blackToken} mr-6`}></div>
-          <p className={styles.scoreText}>{blackCount}</p>
+    <div className="bg-gradient-to-br from-gray-200 to-gray-400 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 w-80 mx-auto mt-10 text-center transform hover:scale-[1.01] transition-transform duration-300">
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Othello</h1>
+      <h2 className="text-xl font-semibold text-gray-700 mb-4">by Angela</h2>
+      <div className="flex justify-center items-center gap-8 mb-6">
+        <div className="flex flex-col items-center">
+          <div className="w-10 h-10 rounded-full bg-white border border-gray-500"></div>
+          <span className="text-lg font-semibold text-gray-700 mt-2">{whiteCount}</span>
         </div>
-        <div className={styles.turnWrapper}>
-          <p className={styles.turnText}>Turn:</p>
-          <div
-            className={`${styles.turnIndicator} ${turn === true ? 'bg-black' : 'bg-white'
-              }`}
-          ></div>
+        <div className="flex flex-col items-center">
+          <div className="w-10 h-10 rounded-full bg-black shadow-lg border border-gray-800"></div>
+          <span className="text-lg font-semibold text-gray-700 mt-2">{blackCount}</span>
         </div>
-        <div className="flex justify-center">
-          <button
+      </div>
+      <div className="text-lg font-medium text-gray-800 mb-4">
+        Turn: <span className="inline-block w-5 h-5 rounded-full ml-2" style={{ backgroundColor: turn ? "black" : "white", border: "1px solid #ccc" }}></span>
+      </div>
 
-          /* calling the newGame function with the onclick */
-            onClick={newGame}
-            className={styles.newGameButton}
-          >
-            New Game
-          </button>
-        </div>
-      </div>
-      <div className="flex flex-col justify-center items-center space-y-4">
-        <div>
-          <button
-            className={styles.changeBoardButton}
-            /* calling the handleBoardSize with the onclick */
-            onClick={handleBoardSize}
-          >
-            {boardSize === 8 ? 'Change board to 10 x 10' : 'Change board to 8 x 8'}
-          </button>
-        </div>
-        <div>
-          <button
-          /* calling the changeDiagonalMoves with the onclick */
-            onClick={changeDiagonalMoves}
-            className={`text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${allowDiagonal
-                ? styles.diagonalMovesButtonEnabled
-                : styles.diagonalMovesButtonDisabled
-              }`}
-          >
-            {allowDiagonal ? 'Diagonal Moves Enabled' : 'Diagonal Moves Disabled'}
-          </button>
-        </div>
-      </div>
+      <button
+        onClick={() => {
+          setMatriz(boardSize === 8 ? baseMatriz() : baseMatriz10x10());
+          setWhiteCount(boardSize === 8 ? 32 : 50);
+          setBlackCount(boardSize === 8 ? 32 : 50);
+          setTurn(true);
+          setEndGame(false);
+        }}
+        className="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-xl transition duration-200 w-full mb-4 shadow-md"
+      >
+        New Game
+      </button>
+
+      <button
+        onClick={handleBoardSize}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-xl transition duration-200 w-full mb-4 shadow-md"
+      >
+        Change board to {boardSize === 8 ? "10 x 10" : "8 x 8"}
+      </button>
+
+      <button
+        onClick={() => setAllowDiagonal(!allowDiagonal)}
+        className={`${
+          allowDiagonal ? "bg-green-600 hover:bg-green-700" : "bg-red-500 hover:bg-red-600"
+        } text-white font-medium py-2 px-4 rounded-xl transition duration-200 w-full shadow-md`}
+      >
+        Diagonal Moves {allowDiagonal ? "Enabled" : "Disabled"}
+      </button>
     </div>
   );
-};
-
-export {ScoreBoard}
+}

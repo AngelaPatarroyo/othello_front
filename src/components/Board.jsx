@@ -1,24 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { ScoreBoard } from './ScoreBoard'
-import Swal from 'sweetalert2'
+import ScoreBoard from './ScoreBoard';
+import Swal from 'sweetalert2';
 import { hasPossibleMoves } from "./CheckPossibleMoves";
 import { TileChecker } from "./TileChecker";
-
-/* 
-Turn: 
-false = white 
-true = black
-
-These constants determine the value of the matrix and are used in the game logic.*/
 
 const empty = 0;
 const black = 2;
 const white = 1;
-
-
-/* 
-Two matrices are used: one 8x8 and the other 10x10.
-*/
 
 const baseMatriz = () => [
   [empty, empty, empty, empty, empty, empty, empty, empty],
@@ -29,20 +17,14 @@ const baseMatriz = () => [
   [empty, empty, empty, empty, empty, empty, empty, empty],
   [empty, empty, empty, empty, empty, empty, empty, empty],
   [empty, empty, empty, empty, empty, empty, empty, empty],
-]
+];
 
 const baseMatriz10x10 = () => [
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, white, black, empty, empty, empty, empty],
-  [empty, empty, empty, empty, black, white, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-  [empty, empty, empty, empty, empty, empty, empty, empty, empty, empty],
-];
+  ...Array(10).fill(null).map(() => Array(10).fill(empty))
+].map((row, i) =>
+  i === 4 ? [...row.slice(0, 4), white, black, ...row.slice(6)] :
+  i === 5 ? [...row.slice(0, 4), black, white, ...row.slice(6)] : row
+);
 
 const Board = () => {
   const [turn, setTurn] = useState(true);
@@ -53,10 +35,6 @@ const Board = () => {
   const [endGame, setEndGame] = useState(false);
   const [allowDiagonal, setAllowDiagonal] = useState(false);
 
-  /* 
-  This function changes the size of the board using the respective useStates and a conditional
-  to determine the size the user wants to play with.
-  */
   const handleBoardSize = () => {
     if (boardSize === 8) {
       setBoardSize(10);
@@ -66,70 +44,40 @@ const Board = () => {
       setBoardSize(8);
     }
   };
-  /* The useEffect is used to update the count of white and black tokens every time 
-  that the matrix changes.  */
-  useEffect(() => {
 
-    /* Calculate the number of white and black tokens on the board based on the size of the board */
-    const whiteTokens = (boardSize === 8 ? 32 : 50) - matriz.reduce(
-      /*Use reduce to sum up the number of white tokens in each row  */
-      (acc, x) => acc + x.filter((value) => value === white).length,
-      0
-    );
-    const blackTokens = (boardSize === 8 ? 32 : 50) - matriz.reduce(
-      (acc, x) => acc + x.filter((value) => value === black).length,
-      0
-    );
+  useEffect(() => {
+    const whiteTokens = (boardSize === 8 ? 32 : 50) - matriz.reduce((acc, row) => acc + row.filter(val => val === white).length, 0);
+    const blackTokens = (boardSize === 8 ? 32 : 50) - matriz.reduce((acc, row) => acc + row.filter(val => val === black).length, 0);
+
     setWhiteCount(whiteTokens);
     setBlackCount(blackTokens);
-    /* Update the state with the counts of white and black tokens */
 
-    /* Check if the game has ended by either player running out of tokens or no more possible moves */
     if (whiteTokens <= 0 || blackTokens <= 0) {
-      /* Set the end game state to true */
       setEndGame(true);
-      /* Show an alert with the winner of the game */
       Swal.fire({
-        title: `Game Over!!! The winner is ... ${whiteTokens <= 0 ? 'White' : 'Black'}`,
-        width: 600,
-        padding: '3em',
-        color: '#716add',
-        background: '#fff url(https://sweetalert2.github.io/images/trees.png)',
-        backdrop: `
-    rgba(0,0,123,0.4)
-    url("https://sweetalert2.github.io/images/nyan-cat.gif")
-    left top
-    no-repeat
-    `
+        title: `Game Over! Winner: ${whiteTokens <= 0 ? 'White' : 'Black'}`,
+        icon: 'success',
+        confirmButtonColor: '#16a34a',
+        background: '#111827',
+        color: '#e5e7eb',
       });
     } else if (!hasPossibleMoves(matriz, turn, allowDiagonal, white, black)) {
-      /* Set the end game state to true */
-      setEndGame(true)
-      /* Show an alert with the winner of the game if there are not possible moves */
+      setEndGame(true);
       Swal.fire({
-        title: `Uh-oh, no more moves... <br>The winner is ${whiteCount < blackCount ? 'White' : 'Black'}`,
-        width: 600,
-        padding: '3em',
-        color: '#716add',
-        background: '#fff url(https://sweetalert2.github.io/images/trees.png)',
-        backdrop: `
-    rgba(0,0,123,0.4)
-    url("https://sweetalert2.github.io/images/nyan-cat.gif")
-    left top
-    no-repeat
-    `
+        title: `No more moves. Winner: ${whiteCount < blackCount ? 'White' : 'Black'}`,
+        icon: 'info',
+        confirmButtonColor: '#16a34a',
+        background: '#111827',
+        color: '#e5e7eb',
       });
     }
   }, [matriz, whiteCount, blackCount, turn, boardSize, allowDiagonal]);
 
-  /* The useEffect hook is activated whenever any of its dependencies change */
-
   return (
-    <div className="flex ml-32">
-      <div className="mt-8 mb-7">
-        {/* Use two maps to render the rows and columns of the board with dynamic styles*/}
+    <div className="min-h-screen bg-gradient-to-br from-black to-green-900 text-white flex flex-col lg:flex-row justify-center items-center gap-12 p-6">
+      <div className="mt-8 mb-7 shadow-2xl rounded-xl overflow-hidden">
         {matriz.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex shadow-lg shadow-slate-700">
+          <div key={rowIndex} className="flex">
             {row.map((col, colIndex) => (
               <TileChecker
                 x={rowIndex}
@@ -152,7 +100,8 @@ const Board = () => {
           </div>
         ))}
       </div>
-      <div className="w-max">
+
+      <div className="w-full max-w-sm">
         <ScoreBoard
           whiteCount={whiteCount}
           blackCount={blackCount}
@@ -169,11 +118,9 @@ const Board = () => {
           allowDiagonal={allowDiagonal}
           setEndGame={setEndGame}
         />
-
       </div>
     </div>
-
   );
-}
+};
 
-export { Board }
+export { Board };

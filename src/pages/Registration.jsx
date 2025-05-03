@@ -1,5 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { ApiContext } from "../context/ApiContext";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -8,9 +10,10 @@ export default function Register() {
     password: "",
     confirmPassword: "",
   });
-
+const { post, endpoints } = useContext(ApiContext);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,13 +36,26 @@ export default function Register() {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
+
     if (Object.keys(validationErrors).length === 0) {
-      setSubmitted(true);
-      console.log("Registration successful:", formData);
+      try {
+        const { data } = await post(
+          endpoints.register, // aquí accedes a la URL de registro
+          { ...formData }     // payload del registro
+        );
+
+        setSubmitted(true);
+        setErrors({});
+        setTimeout(() => navigate("/login"), 2000); // redirige al login tras 2 seg
+      } catch (error) {
+        console.error('Error en registro:', error);
+        setErrors({ general: error.message });
+        setSubmitted(false);
+      }
     }
   };
 
@@ -58,7 +74,7 @@ export default function Register() {
             name="username"
             value={formData.username}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-green-600 focus:border-green-600"
+            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm px-4 py-2 focus:ring-green-600 focus:border-green-600"
           />
           {errors.username && <p className="text-red-600 text-sm">{errors.username}</p>}
         </div>
@@ -70,7 +86,7 @@ export default function Register() {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-green-600 focus:border-green-600"
+            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm px-4 py-2 focus:ring-green-600 focus:border-green-600"
           />
           {errors.email && <p className="text-red-600 text-sm">{errors.email}</p>}
         </div>
@@ -82,7 +98,7 @@ export default function Register() {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-green-600 focus:border-green-600"
+            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm px-4 py-2 focus:ring-green-600 focus:border-green-600"
           />
           {errors.password && <p className="text-red-600 text-sm">{errors.password}</p>}
         </div>
@@ -94,7 +110,7 @@ export default function Register() {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm focus:ring-green-600 focus:border-green-600"
+            className="mt-1 block w-full rounded-xl border-gray-300 shadow-sm px-4 py-2 focus:ring-green-600 focus:border-green-600"
           />
           {errors.confirmPassword && (
             <p className="text-red-600 text-sm">{errors.confirmPassword}</p>
@@ -110,10 +126,15 @@ export default function Register() {
 
         {submitted && (
           <p className="text-green-700 text-center font-semibold mt-4">
-            Registration successful!
+            Registration successful! Redirecting to login...
+          </p>
+        )}
+        {errors.general && (
+          <p className="text-red-600 text-center font-semibold mt-2">
+            {errors.general}
           </p>
         )}
       </form>
     </div>
   );
-}  
+}
