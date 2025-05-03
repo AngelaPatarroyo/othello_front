@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { ApiContext } from '../context/ApiContext';
-import { jwtDecode } from 'jwt-decode';
+import { useAuth } from '../context/AuthContext';
 
 export default function LeaderBoard() {
   const { endpoints, get } = useContext(ApiContext);
+  const { token, user } = useAuth();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
-
-  const token = localStorage.getItem("token");
-  const user = token ? jwtDecode(token) : null;
 
   useEffect(() => {
     if (!token || !user) {
@@ -16,19 +14,20 @@ export default function LeaderBoard() {
       return;
     }
 
-    const config = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     const fetchLeaderboard = async () => {
       try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
         const res = user.role === "Admin"
           ? await get(endpoints.getLeaderboard, config)
           : await get(endpoints.getUserLeaderboard(user.id), config);
 
         setUsers(user.role === "Admin" ? res.data : [res.data]);
+        setError("");
       } catch (err) {
         console.error("Error fetching leaderboard:", err);
         setError("Failed to fetch leaderboard");
@@ -36,7 +35,7 @@ export default function LeaderBoard() {
     };
 
     fetchLeaderboard();
-  }, [token]);
+  }, [token, user, get, endpoints]);
 
   return (
     <div className="max-w-xl mx-auto p-6 text-center">
@@ -45,7 +44,8 @@ export default function LeaderBoard() {
       <ul className="space-y-2">
         {users.map((u, index) => (
           <li key={u.id || index} className="bg-white border rounded-lg py-2 px-4 shadow-md">
-            <span className="font-semibold">{u.username}</span> — <span className="text-green-700">{u.wins} wins</span>
+            <span className="font-semibold">{u.username || u.email}</span> —{" "}
+            <span className="text-green-700">{u.wins} wins</span>
           </li>
         ))}
       </ul>

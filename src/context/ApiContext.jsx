@@ -7,7 +7,7 @@ const BASE_URL = process.env.REACT_APP_PUBLIC_API_URL;
 const endpoints = {
   register: `${BASE_URL}/user/register`,
   login: `${BASE_URL}/user/login`,
-  getLeaderboard: `${BASE_URL}/LeaderBoard`,                 // Admin only
+  getLeaderboard: `${BASE_URL}/leaderboard`,                 // Admin only
   getUserLeaderboard: (id) => `${BASE_URL}/leaderboard/${id}`, // For specific user
   createGame: `${BASE_URL}/game/create`,
   getGame: (id) => `${BASE_URL}/game/${id}`,

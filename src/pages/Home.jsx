@@ -31,9 +31,12 @@ export default function Home() {
           </>
         ) : (
           <p className="text-green-700 text-lg font-semibold">
-            You're logged in as <span className="text-black font-bold">{user.username}</span>.{' '}
+            You're logged in as <span className="text-black font-bold">
+              {user?.username || user?.email?.split('@')[0] || 'User'}
+            </span>.{' '}
             <Link to="/gameboard" className="underline hover:text-green-900">Go to the game</Link>!
           </p>
+
         )}
 
         <p className="text-sm text-gray-400 mt-6">Ready to play?</p>

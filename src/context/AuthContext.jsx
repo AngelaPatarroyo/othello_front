@@ -21,12 +21,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = async (username, password, loginUrl) => {
+  const login = async (email, password, loginUrl) => {
     try {
       const res = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }), // ✅ Use `email` here
       });
 
       if (!res.ok) throw new Error('Login failed');
@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }) => {
       setToken(data.token);
       setUser(decoded);
       localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(decoded));
       return true;
     } catch (err) {
       console.error('Login error:', err);
@@ -47,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   return (
