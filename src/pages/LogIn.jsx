@@ -2,6 +2,7 @@
 import { useState, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { ApiContext } from "../context/ApiContext";
+import { jwtDecode } from 'jwt-decode';
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -29,31 +30,32 @@ export default function Login() {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
-
+  
     if (Object.keys(validationErrors).length === 0) {
       try {
-
-        const { data } = await post(
-          endpoints.login,        // aquí accedes a la URL de login
-          { ...formData }     // payload del login
-        )
-        console.log('Token:', data.token)
-
-        // Guarda el token y los datos del usuario (ajusta según tu backend)
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        setSubmitted(true);
-        setErrors({});
-        setTimeout(() => navigate('/gameboard'), 1500); // redirige al GameBoard
-
+        const { data } = await post(endpoints.login, { ...formData });
+        console.log("Login response:", data);
+  
+        if (data?.token) {
+          const decodedUser = jwtDecode(data.token); // <- Aquí extraes el user del token
+  
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(decodedUser)); // <- guardas el user desde el token
+          setSubmitted(true);
+          setErrors({});
+          setTimeout(() => navigate("/gameboard"), 1500);
+        } else {
+          throw new Error("Invalid login response. Token missing.");
+        }
+  
       } catch (error) {
-        console.error('Error en login:', error);
+        console.error("Error en login:", error);
         setErrors({ general: error.message });
         setSubmitted(false);
       }
     }
-  };
+  };  
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-black p-6">

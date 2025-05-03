@@ -1,13 +1,14 @@
 import React, { createContext, useContext } from 'react';
 import axios from 'axios';
 
-// URL base del backend
-const BASE_URL = process.env.REACT_APP_RENDER;
+// Use the correct .env variable for local or deployed API
+const BASE_URL = process.env.REACT_APP_PUBLIC_API_URL;
 
 const endpoints = {
   register: `${BASE_URL}/user/register`,
   login: `${BASE_URL}/user/login`,
-  getLeaderboard: `${BASE_URL}/leaderboard`,
+  getLeaderboard: `${BASE_URL}/leaderboard`,                 // Admin only
+  getUserLeaderboard: (id) => `${BASE_URL}/leaderboard/${id}`, // For specific user
   createGame: `${BASE_URL}/game/create`,
   getGame: (id) => `${BASE_URL}/game/${id}`,
   makeMove: `${BASE_URL}/game/move`, 
