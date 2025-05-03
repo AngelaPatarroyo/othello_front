@@ -2,14 +2,14 @@
 import { useState, useContext } from "react";
 import { useNavigate } from 'react-router-dom';
 import { ApiContext } from "../context/ApiContext";
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode'; 
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
-  const { post, endpoints } = useContext(ApiContext)
+  const { post, endpoints } = useContext(ApiContext);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,32 +30,29 @@ export default function Login() {
     e.preventDefault();
     const validationErrors = validate();
     setErrors(validationErrors);
-  
+
     if (Object.keys(validationErrors).length === 0) {
       try {
         const { data } = await post(endpoints.login, { ...formData });
         console.log("Login response:", data);
-  
+
         if (data?.token) {
-          const decodedUser = jwtDecode(data.token); // <- Aquí extraes el user del token
-  
+          const decodedUser = jwtDecode(data.token);
           localStorage.setItem("token", data.token);
-          localStorage.setItem("user", JSON.stringify(decodedUser)); // <- guardas el user desde el token
+          localStorage.setItem("user", JSON.stringify(decodedUser));
           setSubmitted(true);
           setErrors({});
           setTimeout(() => navigate("/gameboard"), 1500);
         } else {
           throw new Error("Invalid login response. Token missing.");
         }
-  
       } catch (error) {
         console.error("Error en login:", error);
         setErrors({ general: error.message });
         setSubmitted(false);
       }
     }
-  };  
-  
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-black p-6">
