@@ -48,9 +48,14 @@ export default function Login() {
   // Redirect once user is present
   useEffect(() => {
     if (user) {
-      navigate("/gameboard");
+      if (user.role === "Admin") {
+        navigate("/leaderboard");
+      } else {
+        navigate(`/leaderboard/${user.nameid}`);  // nameid is your user ID from the JWT
+      }
     }
   }, [user, navigate]);
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-black p-6">

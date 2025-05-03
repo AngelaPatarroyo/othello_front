@@ -7,6 +7,8 @@ import GameBoard from './pages/GameBoard';
 import Navbar from './components/Navbar';
 import { ApiProvider } from './context/ApiContext';
 import { AuthProvider } from './context/AuthContext'; 
+import AdminPanel from './pages/AdminPanel';
+
 function App() {
   return (
     <ApiProvider>
@@ -19,6 +21,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/registration" element={<Registration />} />
             <Route path="/gameboard" element={<GameBoard />} />
+            <Route path="/admin" element={<AdminPanel />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

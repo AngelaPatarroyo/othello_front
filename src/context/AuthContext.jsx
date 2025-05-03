@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
       const res = await fetch(loginUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }), // ✅ Use `email` here
+        body: JSON.stringify({ email, password }), // Use `email` here
       });
 
       if (!res.ok) throw new Error('Login failed');

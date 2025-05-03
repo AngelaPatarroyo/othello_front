@@ -8,34 +8,30 @@ export default function LeaderBoard() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
 
+  const fetchLeaderboard = async () => {
+    try {
+      const config = {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+      console.log(endpoints.getLeaderBoard);
+      const res = user.role === "Admin"
+        ? await get(endpoints.getLeaderBoard, config)
+        : await get(endpoints.getUserLeaderboard(user.id), config);
+
+      setUsers(user.role === "Admin" ? res.data : [res.data]);
+      setError("");
+    } catch (err) {
+      console.error("Error fetching leaderboard:", err);
+      setError("Failed to fetch leaderboard");
+    }
+  };
   useEffect(() => {
     if (!token || !user) {
       setError("User not authenticated");
       return;
     }
-
-    const fetchLeaderboard = async () => {
-      try {
-        const config = {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        };
-
-        const res = user.role === "Admin"
-          ? await get(endpoints.getLeaderboard, config)
-          : await get(endpoints.getUserLeaderboard(user.id), config);
-
-        setUsers(user.role === "Admin" ? res.data : [res.data]);
-        setError("");
-      } catch (err) {
-        console.error("Error fetching leaderboard:", err);
-        setError("Failed to fetch leaderboard");
-      }
-    };
-
     fetchLeaderboard();
-  }, [token, user, get, endpoints]);
+  }, [token, user]);
 
   return (
     <div className="max-w-xl mx-auto p-6 text-center">
