@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { ApiContext } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -8,30 +8,28 @@ export default function LeaderBoard() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
 
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = useCallback(async () => {
     try {
-      const config = {
-        headers: { Authorization: `Bearer ${token}` }
-      }
-      console.log(endpoints.getLeaderBoard);
+      console.log("Fetching leaderboard:", endpoints.getLeaderBoard);
       const res = user.role === "Admin"
-        ? await get(endpoints.getLeaderBoard, config)
-        : await get(endpoints.getUserLeaderboard(user.id), config);
+        ? await get(endpoints.getLeaderBoard)
+        : await get(endpoints.getUserLeaderboard(user.id));
 
-      setUsers(user.role === "Admin" ? res.data : [res.data]);
+      setUsers(user.role === "Admin" ? res.data.data : [res.data.data]);
       setError("");
     } catch (err) {
       console.error("Error fetching leaderboard:", err);
       setError("Failed to fetch leaderboard");
     }
-  };
+  }, [user, endpoints, get]);
+
   useEffect(() => {
     if (!token || !user) {
       setError("User not authenticated");
       return;
     }
     fetchLeaderboard();
-  }, [token, user]);
+  }, [token, user, fetchLeaderboard]);
 
   return (
     <div className="max-w-xl mx-auto p-6 text-center">

@@ -1,38 +1,59 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import axios from 'axios';
 
-// Use the correct .env variable for local or deployed API
 const BASE_URL = process.env.REACT_APP_PUBLIC_API_URL;
 
+// All endpoints now use trailing slash consistently and assume BASE_URL ends with /
 const endpoints = {
-    register: `${BASE_URL}/user/register`,
-    login: `${BASE_URL}/user/login`,
-    getLeaderBoard: `${BASE_URL}/leaderboard`,                 // Admin only
-    getUserLeaderboard: (id) => `${BASE_URL}/leaderboard/${id}`, // For specific user
-    createGame: `${BASE_URL}/game/create`,
-    getGame: (id) => `${BASE_URL}/game/${id}`,
-    makeMove: `${BASE_URL}/game/move`,
-    getAllUsers: `${BASE_URL}/user`,
-    deleteUser: (id) => `${BASE_URL}/user/${id}`,
-
+  register: `${BASE_URL}/user/register`,
+  login: `${BASE_URL}/user/login`,
+  getLeaderBoard: `${BASE_URL}/leaderboard`,
+  getUserLeaderboard: (id) => `${BASE_URL}leaderboard/${id}`,
+  createGame: `${BASE_URL}game/create`,
+  getGame: (id) => `${BASE_URL}game/${id}`,
+  makeMove: `${BASE_URL}game/move`,
+  getAllUsers: `${BASE_URL}user`,
+  deleteUser: (id) => `${BASE_URL}user/${id}`,
 };
+
+// Create a reusable Axios instance
+const axiosInstance = axios.create();
 
 export const ApiContext = createContext();
 
 export const ApiProvider = ({ children }) => {
-    const api = {
-        endpoints,
-        get: (url, config = {}) => axios.get(url, config),
-        post: (url, data, config = {}) => axios.post(url, data, config),
-        put: (url, data, config = {}) => axios.put(url, data, config),
-        del: (url, config = {}) => axios.delete(url, config),
-    };
-
-    return (
-        <ApiContext.Provider value={api}>
-            {children}
-        </ApiContext.Provider>
+  // Automatically attach JWT token to all requests
+  useEffect(() => {
+    const interceptor = axiosInstance.interceptors.request.use(
+      (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
     );
+
+    return () => {
+      // Clean up interceptor on unmount
+      axiosInstance.interceptors.request.eject(interceptor);
+    };
+  }, []);
+
+  const api = {
+    endpoints,
+    get: (url, config = {}) => axiosInstance.get(url, config),
+    post: (url, data, config = {}) => axiosInstance.post(url, data, config),
+    put: (url, data, config = {}) => axiosInstance.put(url, data, config),
+    del: (url, config = {}) => axiosInstance.delete(url, config),
+  };
+
+  return (
+    <ApiContext.Provider value={api}>
+      {children}
+    </ApiContext.Provider>
+  );
 };
 
 export const useApi = () => useContext(ApiContext);
