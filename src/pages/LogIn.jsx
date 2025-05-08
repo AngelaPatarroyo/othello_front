@@ -10,7 +10,7 @@ export default function Login() {
 
   const navigate = useNavigate();
   const { post, endpoints } = useContext(ApiContext);
-  const { login, user } = useAuth(); // Use context login and user
+  const { login, user } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -37,7 +37,6 @@ export default function Login() {
       if (success) {
         setSubmitted(true);
         setErrors({});
-        // Don't navigate here — let useEffect handle it when context updates
       } else {
         setErrors({ general: "Invalid credentials" });
         setSubmitted(false);
@@ -45,17 +44,15 @@ export default function Login() {
     }
   };
 
-  // Redirect once user is present
   useEffect(() => {
     if (user) {
       if (user.role === "Admin") {
         navigate("/leaderboard");
       } else {
-        navigate(`/leaderboard/${user.nameid}`);  // nameid is your user ID from the JWT
+        navigate(`/leaderboard/${user.id}`);
       }
     }
   }, [user, navigate]);
-
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-800 to-black p-6">

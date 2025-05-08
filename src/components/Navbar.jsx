@@ -15,11 +15,11 @@ export default function Navbar() {
 
   const navItems = [
     { to: "/", label: "Home" },
-    user && { to: "/leaderboard", label: "Leaderboard" },
-    user && { to: "/gameboard", label: "Game" },
-    user?.role === "Admin" && { to: "/admin", label: "Admin Panel" },
-    !user && { to: "/login", label: "Login" },
-    !user && { to: "/registration", label: "Register" },
+    user ? { to: "/leaderboard", label: "Leaderboard" } : null,
+    user ? { to: "/gameboard", label: "Game" } : null,
+    user?.role === "Admin" ? { to: "/admin", label: "Admin Panel" } : null,
+    !user ? { to: "/login", label: "Login" } : null,
+    !user ? { to: "/registration", label: "Register" } : null,
   ].filter(Boolean);
 
   return (
@@ -30,9 +30,9 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden md:flex space-x-6 items-center">
-          {navItems.map((item) => (
+          {navItems.map((item, index) => (
             <Link
-              key={item.to}
+              key={index}
               to={item.to}
               className={`px-3 py-2 rounded-md text-sm font-medium ${location.pathname === item.to ? "bg-gray-700" : "hover:bg-gray-700"}`}
             >
@@ -42,7 +42,7 @@ export default function Navbar() {
           {user && (
             <>
               <span className="text-sm text-gray-300">
-                Welcome, {user?.username || user?.email?.split('@')[0] || 'User'}
+                Welcome, {user.userName || 'User'}
               </span>
               <button
                 onClick={handleLogout}

@@ -7,34 +7,16 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
 
-  const extractRole = (decoded) => {
-    const knownKeys = ['role', 'roles', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
-    const roleKey = Object.keys(decoded).find((k) =>
-      knownKeys.includes(k.toLowerCase()) || k.toLowerCase().includes('role')
-    );
-    if (!roleKey) return null;
-    const val = decoded[roleKey];
-    return Array.isArray(val) ? val[0] : val;
-  };
-
-  const extractUserId = (decoded) => {
-    return decoded.nameid || decoded.sub || null;
-  };
-
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode(storedToken);
-        const role = extractRole(decoded);
-        const userId = extractUserId(decoded);
-        console.log('Decoded token:', decoded);
-        console.log('Extracted role:', role);
+    const storedUser = localStorage.getItem('user');
 
+    if (storedToken && storedUser) {
+      try {
         setToken(storedToken);
-        setUser({ ...decoded, role, id: userId });
+        setUser(JSON.parse(storedUser));
       } catch (err) {
-        console.error('Invalid token:', err);
+        console.error('Failed to parse stored user:', err);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       }
@@ -55,10 +37,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await res.json();
-      const decoded = jwtDecode(data.token);
-      const role = extractRole(decoded);
-      const userId = extractUserId(decoded);
-      const normalizedUser = { ...decoded, role, id: userId };
+
+      // Normalize the user keys for consistency
+      const normalizedUser = {
+        id: data.user.id || data.user.Id,
+        userName: data.user.userName || data.user.UserName,
+        email: data.user.email || data.user.Email,
+        role: data.user.role || data.user.Role
+      };
 
       setToken(data.token);
       setUser(normalizedUser);
