@@ -1,12 +1,14 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ApiContext } from '../context/ApiContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function StartGamePage() {
   const { token, user } = useAuth();
   const { endpoints, get, post } = useContext(ApiContext);
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -14,7 +16,6 @@ export default function StartGamePage() {
         const res = await get(endpoints.getAvailableUsers, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log("Fetched players:", res.data);
         setPlayers(res.data);
       } catch (err) {
         console.error("Failed to fetch players:", err?.response?.data || err.message);
@@ -26,20 +27,26 @@ export default function StartGamePage() {
   }, [endpoints, get, token]);
 
   const challengePlayer = async (opponentId) => {
+    const payload = {
+      player1Id: user.id,
+      player2Id: opponentId
+    };
+    console.log("Sending challenge request with:", payload);
+
     try {
       const res = await post(
         endpoints.createGameWithOpponent,
-        {
-          player1Id: user.id,
-          player2Id: opponentId
-        },
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("Game started!");
-      // Optional redirect:
-      // window.location.href = `/game/${res.data.gameId}`;
+
+      if (res.data?.gameId || res.data?.GameId) {
+        navigate("/gameboard");
+      } else {
+        alert("Game started, but no game ID returned.");
+      }
     } catch (err) {
       console.error("Challenge failed:", err?.response?.data || err.message);
       setError("Failed to start game.");
@@ -51,17 +58,22 @@ export default function StartGamePage() {
       <h2 className="text-2xl font-bold mb-4">Available Players</h2>
       {error && <p className="text-red-500">{error}</p>}
       <ul className="space-y-2">
-        {players.map((player) => (
-          <li key={player.PlayerId} className="p-4 bg-gray-100 rounded shadow flex justify-between items-center">
-            <span>{player.PlayerName || player.Email}</span>
-            <button
-              onClick={() => challengePlayer(player.PlayerId)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-            >
-              Challenge
-            </button>
-          </li>
-        ))}
+        {players.map((player) => {
+          const opponentId = player.id || player.Id;
+          const displayName = player.userName || player.UserName || player.email || player.Email;
+
+          return (
+            <li key={opponentId} className="p-4 bg-gray-100 rounded shadow flex justify-between items-center">
+              <span>{displayName}</span>
+              <button
+                onClick={() => challengePlayer(opponentId)}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+              >
+                Challenge
+              </button>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
