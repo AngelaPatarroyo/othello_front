@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { ApiContext } from '../context/ApiContext';
 
 export default function StartGamePage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const { endpoints, get, post } = useContext(ApiContext);
   const [players, setPlayers] = useState([]);
   const [error, setError] = useState("");
@@ -11,9 +11,10 @@ export default function StartGamePage() {
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
-        const res = await get(`${endpoints.base}/User/available`, {
+        const res = await get(endpoints.getAvailableUsers, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        console.log("Fetched players:", res.data);
         setPlayers(res.data);
       } catch (err) {
         console.error("Failed to fetch players:", err?.response?.data || err.message);
@@ -27,12 +28,18 @@ export default function StartGamePage() {
   const challengePlayer = async (opponentId) => {
     try {
       const res = await post(
-        `${endpoints.base}/Game/challenge`,
-        { opponentId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        endpoints.createGameWithOpponent,
+        {
+          player1Id: user.id,
+          player2Id: opponentId
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       alert("Game started!");
-      // Optionally redirect: window.location.href = `/game/${res.data.gameId}`;
+      // Optional redirect:
+      // window.location.href = `/game/${res.data.gameId}`;
     } catch (err) {
       console.error("Challenge failed:", err?.response?.data || err.message);
       setError("Failed to start game.");
@@ -45,10 +52,10 @@ export default function StartGamePage() {
       {error && <p className="text-red-500">{error}</p>}
       <ul className="space-y-2">
         {players.map((player) => (
-          <li key={player.id} className="p-4 bg-gray-100 rounded shadow flex justify-between items-center">
-            <span>{player.userName || player.email}</span>
+          <li key={player.PlayerId} className="p-4 bg-gray-100 rounded shadow flex justify-between items-center">
+            <span>{player.PlayerName || player.Email}</span>
             <button
-              onClick={() => challengePlayer(player.id)}
+              onClick={() => challengePlayer(player.PlayerId)}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
             >
               Challenge

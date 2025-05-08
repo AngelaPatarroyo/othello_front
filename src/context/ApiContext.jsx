@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import axios from 'axios';
 
-
 const BASE_URL = process.env.REACT_APP_PUBLIC_API_URL;
-
 
 const endpoints = {
   register: `${BASE_URL}user/register`,
@@ -14,10 +12,11 @@ const endpoints = {
   getGame: (id) => `${BASE_URL}game/${id}`,
   makeMove: `${BASE_URL}game/move`,
   getAllUsers: `${BASE_URL}user`,
+  getAvailableUsers: `${BASE_URL}user/available`,
   deleteUser: (id) => `${BASE_URL}user/${id}`,
+  updateUser: (id) => `${BASE_URL}user/${id}`, // ✅ Added this
   startGame: `${BASE_URL}game/start`,
   createGameWithOpponent: `${BASE_URL}game/challenge`,
-
 };
 
 const axiosInstance = axios.create();
