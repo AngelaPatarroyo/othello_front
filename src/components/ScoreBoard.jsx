@@ -1,5 +1,5 @@
 import React from "react";
-
+import { useNavigate } from "react-router-dom";
 
 export default function ScoreBoard({
   whiteCount,
@@ -17,10 +17,13 @@ export default function ScoreBoard({
   allowDiagonal,
   setEndGame
 }) {
+  const navigate = useNavigate();
+
   return (
     <div className="bg-gradient-to-br from-gray-200 to-gray-400 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 w-80 mx-auto mt-10 text-center transform hover:scale-[1.01] transition-transform duration-300">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Othello</h1>
       <h2 className="text-xl font-semibold text-gray-700 mb-4">by Angela</h2>
+
       <div className="flex justify-center items-center gap-8 mb-6">
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 rounded-full bg-white border border-gray-500"></div>
@@ -31,18 +34,21 @@ export default function ScoreBoard({
           <span className="text-lg font-semibold text-gray-700 mt-2">{blackCount}</span>
         </div>
       </div>
+
       <div className="text-lg font-medium text-gray-800 mb-4">
-        Turn: <span className="inline-block w-5 h-5 rounded-full ml-2" style={{ backgroundColor: turn ? "black" : "white", border: "1px solid #ccc" }}></span>
+        Turn:
+        <span
+          className="inline-block w-5 h-5 rounded-full ml-2"
+          style={{
+            backgroundColor: turn ? "black" : "white",
+            border: "1px solid #ccc"
+          }}
+        ></span>
       </div>
 
+      {/* 🟢 Redirect to /game/start page */}
       <button
-        onClick={() => {
-          setMatriz(boardSize === 8 ? baseMatriz() : baseMatriz10x10());
-          setWhiteCount(boardSize === 8 ? 32 : 50);
-          setBlackCount(boardSize === 8 ? 32 : 50);
-          setTurn(true);
-          setEndGame(false);
-        }}
+        onClick={() => navigate("/game/start")}
         className="bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-xl transition duration-200 w-full mb-4 shadow-md"
       >
         New Game

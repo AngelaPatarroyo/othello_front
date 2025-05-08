@@ -1,28 +1,28 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import axios from 'axios';
 
+
 const BASE_URL = process.env.REACT_APP_PUBLIC_API_URL;
 
-// All endpoints now use trailing slash consistently and assume BASE_URL ends with /
+
 const endpoints = {
-  register: `${BASE_URL}/user/register`,
-  login: `${BASE_URL}/user/login`,
-  getLeaderBoard: `${BASE_URL}/leaderboard`,
+  register: `${BASE_URL}user/register`,
+  login: `${BASE_URL}user/login`,
+  getLeaderBoard: `${BASE_URL}leaderboard`,
   getUserLeaderboard: (id) => `${BASE_URL}leaderboard/${id}`,
   createGame: `${BASE_URL}game/create`,
   getGame: (id) => `${BASE_URL}game/${id}`,
   makeMove: `${BASE_URL}game/move`,
   getAllUsers: `${BASE_URL}user`,
   deleteUser: (id) => `${BASE_URL}user/${id}`,
+  startGame: `${BASE_URL}game/start`,
 };
 
-// Create a reusable Axios instance
 const axiosInstance = axios.create();
 
 export const ApiContext = createContext();
 
 export const ApiProvider = ({ children }) => {
-  // Automatically attach JWT token to all requests
   useEffect(() => {
     const interceptor = axiosInstance.interceptors.request.use(
       (config) => {
@@ -36,7 +36,6 @@ export const ApiProvider = ({ children }) => {
     );
 
     return () => {
-      // Clean up interceptor on unmount
       axiosInstance.interceptors.request.eject(interceptor);
     };
   }, []);

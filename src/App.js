@@ -8,6 +8,7 @@ import Navbar from './components/Navbar';
 import { ApiProvider } from './context/ApiContext';
 import { AuthProvider } from './context/AuthContext'; 
 import AdminPanel from './pages/AdminPanel';
+import StartGamePage from './pages/StartGamePage';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/registration" element={<Registration />} />
             <Route path="/gameboard" element={<GameBoard />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/game/start" element={<StartGamePage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

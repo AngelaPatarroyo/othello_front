@@ -8,11 +8,17 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   const extractRole = (decoded) => {
-    const roleKey = Object.keys(decoded).find(
-      (k) => k.toLowerCase().includes("role")
+    const knownKeys = ['role', 'roles', 'http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    const roleKey = Object.keys(decoded).find((k) =>
+      knownKeys.includes(k.toLowerCase()) || k.toLowerCase().includes('role')
     );
-    const roleValue = decoded[roleKey];
-    return Array.isArray(roleValue) ? roleValue[0] : roleValue;
+    if (!roleKey) return null;
+    const val = decoded[roleKey];
+    return Array.isArray(val) ? val[0] : val;
+  };
+
+  const extractUserId = (decoded) => {
+    return decoded.nameid || decoded.sub || null;
   };
 
   useEffect(() => {
@@ -21,8 +27,12 @@ export const AuthProvider = ({ children }) => {
       try {
         const decoded = jwtDecode(storedToken);
         const role = extractRole(decoded);
+        const userId = extractUserId(decoded);
+        console.log('Decoded token:', decoded);
+        console.log('Extracted role:', role);
+
         setToken(storedToken);
-        setUser({ ...decoded, role });
+        setUser({ ...decoded, role, id: userId });
       } catch (err) {
         console.error('Invalid token:', err);
         localStorage.removeItem('token');
@@ -39,20 +49,25 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      if (!res.ok) throw new Error('Login failed');
-      const data = await res.json();
+      if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error.message || 'Login failed');
+      }
 
+      const data = await res.json();
       const decoded = jwtDecode(data.token);
       const role = extractRole(decoded);
-      const normalizedUser = { ...decoded, role };
+      const userId = extractUserId(decoded);
+      const normalizedUser = { ...decoded, role, id: userId };
 
       setToken(data.token);
       setUser(normalizedUser);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(normalizedUser));
+
       return true;
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('Login error:', err.message);
       return false;
     }
   };
