@@ -21,6 +21,7 @@ export default function Navbar() {
     { to: '/', label: 'Home' },
     user ? { to: '/leaderboard', label: 'Leaderboard' } : null,
     user?.role === 'Admin' ? { to: '/admin', label: 'Admin Panel' } : null,
+    user?.role === 'Admin' ? { to: '/games', label: 'All Games' } : null, // ✅ New link
     !user ? { to: '/login', label: 'Login' } : null,
     !user ? { to: '/registration', label: 'Register' } : null,
   ].filter(Boolean);

@@ -14,8 +14,13 @@ export default function ScoreBoard({
   handleBoardSize,
   setAllowDiagonal,
   allowDiagonal,
-  setEndGame
+  setEndGame,
+  whitePlayerName,
+  blackPlayerName
 }) {
+  const whiteName = whitePlayerName || localStorage.getItem("whitePlayerName") || "White";
+  const blackName = blackPlayerName || localStorage.getItem("blackPlayerName") || "Black";
+
   return (
     <div className="bg-gradient-to-br from-gray-200 to-gray-400 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] p-8 w-80 mx-auto mt-10 text-center transform hover:scale-[1.01] transition-transform duration-300">
       <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Othello</h1>
@@ -24,11 +29,13 @@ export default function ScoreBoard({
       <div className="flex justify-center items-center gap-8 mb-6">
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 rounded-full bg-white border border-gray-500"></div>
-          <span className="text-lg font-semibold text-gray-700 mt-2">{whiteCount}</span>
+          <span className="text-sm text-gray-600 mt-1">{whiteName}</span>
+          <span className="text-lg font-semibold text-gray-700 mt-1">{whiteCount}</span>
         </div>
         <div className="flex flex-col items-center">
           <div className="w-10 h-10 rounded-full bg-black shadow-lg border border-gray-800"></div>
-          <span className="text-lg font-semibold text-gray-700 mt-2">{blackCount}</span>
+          <span className="text-sm text-gray-600 mt-1">{blackName}</span>
+          <span className="text-lg font-semibold text-gray-700 mt-1">{blackCount}</span>
         </div>
       </div>
 

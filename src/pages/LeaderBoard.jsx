@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { ApiContext } from '../context/ApiContext';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function LeaderBoard() {
   const { endpoints, get } = useContext(ApiContext);
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [error, setError] = useState("");
 
@@ -28,11 +30,14 @@ export default function LeaderBoard() {
 
   useEffect(() => {
     if (!token || !user) {
-      setError("User not authenticated");
+      navigate('/login'); // or return null; if you don’t want redirect
       return;
     }
+
     fetchLeaderboard();
-  }, [token, user, fetchLeaderboard]);
+  }, [token, user, fetchLeaderboard, navigate]);
+
+  if (!user) return null;
 
   return (
     <div className="max-w-4xl mx-auto p-6 text-center">

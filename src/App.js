@@ -9,6 +9,7 @@ import { ApiProvider } from './context/ApiContext';
 import { AuthProvider } from './context/AuthContext'; 
 import AdminPanel from './pages/AdminPanel';
 import StartGamePage from './pages/StartGamePage';
+import AllGames from './pages/AllGames';
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             <Route path="/gameboard" element={<GameBoard />} />
             <Route path="/admin" element={<AdminPanel />} />
             <Route path="/game/start" element={<StartGamePage />} />
+            <Route path="/games" element={<AllGames />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

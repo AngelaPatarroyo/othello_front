@@ -17,6 +17,8 @@ const endpoints = {
   updateUser: (id) => `${BASE_URL}user/${id}`, 
   startGame: `${BASE_URL}game/start`,
   createGameWithOpponent: `${BASE_URL}game/challenge`,
+  getAllGames: `${BASE_URL}game/`,
+  getUserById: `${BASE_URL}user`
 };
 
 const axiosInstance = axios.create();

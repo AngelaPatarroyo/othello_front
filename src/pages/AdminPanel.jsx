@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { ApiContext } from '../context/ApiContext';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 export default function AdminPanel() {
   const { user, token } = useAuth();
@@ -11,7 +12,8 @@ export default function AdminPanel() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user || String(user.role).toLowerCase() !== 'admin') {
+    if (!user) return; // ⛔ prevent hook crash during logout
+    if (String(user.role).toLowerCase() !== 'admin') {
       navigate('/not-authorized');
       return;
     }
@@ -33,58 +35,90 @@ export default function AdminPanel() {
   }, [user, token, get, endpoints, navigate]);
 
   const handleDelete = async (id) => {
-    if (id === user.id) {
+    if (!user || id === user.id) {
       setError("You cannot delete your own account.");
       return;
     }
+
+    const confirm = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This action cannot be undone.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (!confirm.isConfirmed) return;
 
     try {
       await del(endpoints.deleteUser(id), {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(users.filter((u) => (u.id || u.Id) !== id));
+      Swal.fire('Deleted!', 'User has been deleted.', 'success');
     } catch (err) {
       console.error('Delete error:', err?.response?.data || err.message || err);
-      setError('Delete failed');
+      Swal.fire('Error', 'Delete failed', 'error');
     }
   };
 
   const handleUpdate = async (u) => {
     const id = u.id || u.Id;
 
-    const username = prompt("New username:", u.userName || u.UserName || "");
-    const email = prompt("New email:", u.email || u.Email || "");
-    const password = prompt("New password:");
-    const confirmPassword = prompt("Confirm password:");
+    const { value: formValues } = await Swal.fire({
+      title: 'Update User',
+      html: `
+        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+          <label for="swal-username">Username</label>
+          <input id="swal-username" class="swal2-input" placeholder="Username" value="${u.userName || u.UserName || ''}" />
 
-    if (!username || !email || !password || password !== confirmPassword) {
-      alert("Invalid input or passwords do not match.");
-      return;
-    }
+          <label for="swal-email">Email</label>
+          <input id="swal-email" class="swal2-input" placeholder="Email" value="${u.email || u.Email || ''}" />
 
-    const updateDto = {
-      username,
-      email,
-      password,
-      confirmPassword,
-    };
+          <label for="swal-password">Password</label>
+          <input id="swal-password" class="swal2-input" type="password" placeholder="Password" />
+
+          <label for="swal-confirm">Confirm Password</label>
+          <input id="swal-confirm" class="swal2-input" type="password" placeholder="Confirm Password" />
+        </div>
+      `,
+      focusConfirm: false,
+      preConfirm: () => {
+        const username = document.getElementById('swal-username').value;
+        const email = document.getElementById('swal-email').value;
+        const password = document.getElementById('swal-password').value;
+        const confirmPassword = document.getElementById('swal-confirm').value;
+
+        if (!username || !email || !password || password !== confirmPassword) {
+          Swal.showValidationMessage('Invalid input or passwords do not match');
+          return;
+        }
+
+        return { username, email, password, confirmPassword };
+      }
+    });
+
+    if (!formValues) return;
 
     try {
-      await put(endpoints.updateUser(id), updateDto, {
+      await put(endpoints.updateUser(id), formValues, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Re-fetch users after update
       const res = await get(endpoints.getAllUsers, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setUsers(res.data);
-      setError('');
+      Swal.fire('Success', 'User updated successfully', 'success');
     } catch (err) {
       console.error('Update error:', err?.response?.data || err.message || err);
-      setError('Update failed');
+      Swal.fire('Error', 'Update failed', 'error');
     }
   };
+
+  if (!user) return null; // 👈 prevent rendering when not logged in
 
   return (
     <div className="p-6 max-w-5xl mx-auto">

@@ -27,6 +27,7 @@ export default function StartGamePage() {
   }, [endpoints, get, token]);
 
   const challengePlayer = async (opponentId) => {
+    const opponent = players.find(p => (p.id || p.Id) === opponentId);
     const payload = {
       player1Id: user.id,
       player2Id: opponentId
@@ -43,6 +44,10 @@ export default function StartGamePage() {
       );
 
       if (res.data?.gameId || res.data?.GameId) {
+        // Save player names to localStorage
+        localStorage.setItem("whitePlayerName", user.userName || user.email);
+        localStorage.setItem("blackPlayerName", opponent?.userName || opponent?.email || opponent?.UserName || opponent?.Email);
+
         navigate("/gameboard");
       } else {
         alert("Game started, but no game ID returned.");
