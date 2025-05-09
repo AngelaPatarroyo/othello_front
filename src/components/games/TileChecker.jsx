@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2';
-import { Tile } from './Tile';
+import  Tile  from './Tile';
 
 const TileChecker = ({ x, y, endGame, matriz, setMatriz,
     setTurn, turn, allowDiagonal, black, white, boardSize, setEndGame, empty }) => {

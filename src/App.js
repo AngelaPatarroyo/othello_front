@@ -1,15 +1,21 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/LogIn';
-import Registration from './pages/Registration';
-import LeaderBoard from './pages/LeaderBoard';
-import GameBoard from './pages/GameBoard';
-import Navbar from './components/Navbar';
-import { ApiProvider } from './context/ApiContext';
-import { AuthProvider } from './context/AuthContext'; 
-import AdminPanel from './pages/AdminPanel';
+
+// Pages
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegistrationPage from './pages/RegistrationPage';
+import LeaderBoardPage from './pages/LeaderBoardPage';
+import GameBoardPage from './pages/GameBoardPage';
+import UserPanelPage from './pages/UserPanelPage';
 import StartGamePage from './pages/StartGamePage';
-import AllGames from './pages/AllGames';
+import AllGamesPage from './pages/AllGamesPage';
+
+// Components
+import Navbar from './components/common/Navbar';
+
+// Context
+import { ApiProvider } from './context/ApiContext';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
   return (
@@ -18,14 +24,14 @@ function App() {
         <BrowserRouter>
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/leaderboard" element={<LeaderBoard />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/registration" element={<Registration />} />
-            <Route path="/gameboard" element={<GameBoard />} />
-            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/registration" element={<RegistrationPage />} />
+            <Route path="/leaderboard" element={<LeaderBoardPage />} />
+            <Route path="/gameboard" element={<GameBoardPage />} />
+            <Route path="/admin" element={<UserPanelPage />} />
             <Route path="/game/start" element={<StartGamePage />} />
-            <Route path="/games" element={<AllGames />} />
+            <Route path="/games" element={<AllGamesPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

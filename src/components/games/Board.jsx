@@ -74,8 +74,10 @@ const Board = () => {
   }, [matriz, whiteCount, blackCount, turn, boardSize, allowDiagonal]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-green-900 text-white flex flex-col lg:flex-row justify-center items-center gap-12 p-6">
-      <div className="mt-8 mb-7 shadow-2xl rounded-xl overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black to-green-900 text-white flex flex-col lg:flex-row items-center justify-center gap-8 p-4 sm:p-6 overflow-x-auto">
+      
+      {/* Game Board */}
+      <div className="w-full overflow-auto lg:w-auto mt-4 sm:mt-8 mb-6 shadow-2xl rounded-xl">
         {matriz.map((row, rowIndex) => (
           <div key={rowIndex} className="flex">
             {row.map((col, colIndex) => (
@@ -101,7 +103,8 @@ const Board = () => {
         ))}
       </div>
 
-      <div className="w-full max-w-sm">
+      {/* Score Board */}
+      <div className="w-full sm:max-w-sm px-4 sm:px-0">
         <ScoreBoard
           whiteCount={whiteCount}
           blackCount={blackCount}

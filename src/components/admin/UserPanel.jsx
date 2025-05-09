@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { ApiContext } from '../context/ApiContext';
+import { useAuth } from '../../context/AuthContext';
+import { ApiContext } from '../../context/ApiContext';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
-export default function AdminPanel() {
+export default function UserPanel() {
   const { user, token } = useAuth();
   const { endpoints, get, del, put } = useContext(ApiContext);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) return; // ⛔ prevent hook crash during logout
+    if (!user) return;
     if (String(user.role).toLowerCase() !== 'admin') {
       navigate('/not-authorized');
       return;
@@ -20,6 +21,7 @@ export default function AdminPanel() {
 
     const fetchUsers = async () => {
       try {
+        setLoading(true);
         const res = await get(endpoints.getAllUsers, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -28,6 +30,9 @@ export default function AdminPanel() {
       } catch (err) {
         console.error('Fetch users error:', err?.response?.data || err.message || err);
         setError('Failed to fetch users');
+        Swal.fire('Error', 'Failed to fetch users.', 'error');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -53,6 +58,7 @@ export default function AdminPanel() {
     if (!confirm.isConfirmed) return;
 
     try {
+      setLoading(true);
       await del(endpoints.deleteUser(id), {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -61,6 +67,8 @@ export default function AdminPanel() {
     } catch (err) {
       console.error('Delete error:', err?.response?.data || err.message || err);
       Swal.fire('Error', 'Delete failed', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -103,6 +111,7 @@ export default function AdminPanel() {
     if (!formValues) return;
 
     try {
+      setLoading(true);
       await put(endpoints.updateUser(id), formValues, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -115,65 +124,73 @@ export default function AdminPanel() {
     } catch (err) {
       console.error('Update error:', err?.response?.data || err.message || err);
       Swal.fire('Error', 'Update failed', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!user) return null; // 👈 prevent rendering when not logged in
+  if (!user) return null;
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-3xl font-bold text-center mb-6">Admin Panel</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">User Management Panel</h1>
+
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
 
-      <table className="min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
-        <thead>
-          <tr className="bg-gray-100 text-left">
-            <th className="py-3 px-4 font-semibold">Username</th>
-            <th className="py-3 px-4 font-semibold">Email</th>
-            <th className="py-3 px-4 font-semibold">Role</th>
-            <th className="py-3 px-4 font-semibold">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr>
-              <td colSpan="4" className="py-4 text-center text-gray-500">
-                No users found.
-              </td>
+      {loading ? (
+        <p className="text-center text-gray-500 text-lg">Loading users...</p>
+      ) : (
+        <table className="min-w-full bg-white border border-gray-300 rounded-xl overflow-hidden">
+          <thead>
+            <tr className="bg-gray-100 text-left">
+              <th className="py-3 px-4 font-semibold">Username</th>
+              <th className="py-3 px-4 font-semibold">Email</th>
+              <th className="py-3 px-4 font-semibold">Role</th>
+              <th className="py-3 px-4 font-semibold">Actions</th>
             </tr>
-          ) : (
-            users.map((u) => {
-              const id = u.id || u.Id;
-              const username = u.userName || u.UserName || '';
-              const email = u.email || u.Email || '';
-              const role = u.role || u.Role || '';
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="py-4 text-center text-gray-500">
+                  No users found.
+                </td>
+              </tr>
+            ) : (
+              users.map((u) => {
+                const id = u.id || u.Id;
+                const username = u.userName || u.UserName || '';
+                const email = u.email || u.Email || '';
+                const role = u.role || u.Role || '';
 
-              return (
-                <tr key={id} className="border-t">
-                  <td className="py-2 px-4">{username}</td>
-                  <td className="py-2 px-4">{email}</td>
-                  <td className="py-2 px-4 capitalize">{role}</td>
-                  <td className="py-2 px-4 space-x-2">
-                    <button
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                      onClick={() => handleDelete(id)}
-                      disabled={id === user.id}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                      onClick={() => handleUpdate(u)}
-                    >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              );
-            })
-          )}
-        </tbody>
-      </table>
+                return (
+                  <tr key={id} className="border-t">
+                    <td className="py-2 px-4">{username}</td>
+                    <td className="py-2 px-4">{email}</td>
+                    <td className="py-2 px-4 capitalize">{role}</td>
+                    <td className="py-2 px-4 space-x-2">
+                      <button
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                        onClick={() => handleDelete(id)}
+                        disabled={loading || id === user.id}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                        onClick={() => handleUpdate(u)}
+                        disabled={loading}
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

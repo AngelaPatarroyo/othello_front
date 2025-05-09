@@ -1,18 +1,20 @@
-"use client";
 import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiContext } from "../context/ApiContext";
+import { ApiContext } from "../../context/ApiContext";
+import Swal from "sweetalert2";
 
-export default function Register() {
+export default function Registration() {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-const { post, endpoints } = useContext(ApiContext);
+
+  const { post, endpoints } = useContext(ApiContext);
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -43,18 +45,19 @@ const { post, endpoints } = useContext(ApiContext);
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const { data } = await post(
-          endpoints.register, // aquí accedes a la URL de registro
-          { ...formData }     // payload del registro
-        );
-
+        setLoading(true);
+        await post(endpoints.register, formData);
         setSubmitted(true);
         setErrors({});
-        setTimeout(() => navigate("/login"), 2000); // redirige al login tras 2 seg
+        Swal.fire("Success", "Registration successful!", "success");
+        setTimeout(() => navigate("/login"), 2000);
       } catch (error) {
-        console.error('Error en registro:', error);
-        setErrors({ general: error.message });
+        console.error("Registration error:", error);
+        setErrors({ general: "Registration failed. Please try again." });
+        Swal.fire("Error", "Registration failed. Please try again.", "error");
         setSubmitted(false);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -65,7 +68,7 @@ const { post, endpoints } = useContext(ApiContext);
         onSubmit={handleSubmit}
         className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md space-y-6"
       >
-        <h2 className="text-2xl font-bold text-center text-green-900">Othello Register</h2>
+        <h2 className="text-2xl font-bold text-center text-green-900">Register</h2>
 
         <div>
           <label className="block text-sm font-semibold text-gray-700">Username</label>
@@ -119,9 +122,12 @@ const { post, endpoints } = useContext(ApiContext);
 
         <button
           type="submit"
-          className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-xl transition duration-200"
+          disabled={loading}
+          className={`w-full ${
+            loading ? "bg-green-400" : "bg-green-700 hover:bg-green-800"
+          } text-white font-semibold py-2 px-4 rounded-xl transition duration-200`}
         >
-          Register
+          {loading ? "Registering..." : "Register"}
         </button>
 
         {submitted && (

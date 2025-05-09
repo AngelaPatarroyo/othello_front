@@ -1,15 +1,17 @@
 import { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ApiContext } from "../context/ApiContext";
-import { useAuth } from "../context/AuthContext";
+import { ApiContext } from "../../context/ApiContext";
+import { useAuth } from "../../context/AuthContext";
+import Swal from "sweetalert2";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { post, endpoints } = useContext(ApiContext);
+  const { endpoints } = useContext(ApiContext);
   const { login, user } = useAuth();
 
   const handleChange = (e) => {
@@ -33,13 +35,23 @@ export default function Login() {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      const success = await login(formData.email, formData.password, endpoints.login);
-      if (success) {
-        setSubmitted(true);
-        setErrors({});
-      } else {
-        setErrors({ general: "Invalid credentials" });
-        setSubmitted(false);
+      try {
+        setLoading(true);
+        const success = await login(formData.email, formData.password, endpoints.login);
+        if (success) {
+          setSubmitted(true);
+          setErrors({});
+          Swal.fire("Success", "Login successful! Redirecting...", "success");
+        } else {
+          setErrors({ general: "Invalid credentials" });
+          Swal.fire("Error", "Invalid credentials", "error");
+        }
+      } catch (err) {
+        console.error("Login error:", err?.message || err);
+        setErrors({ general: "Something went wrong. Please try again." });
+        Swal.fire("Error", "Something went wrong during login.", "error");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -88,9 +100,12 @@ export default function Login() {
 
         <button
           type="submit"
-          className="w-full bg-green-700 hover:bg-green-800 text-white font-semibold py-2 px-4 rounded-xl transition duration-200"
+          disabled={loading}
+          className={`w-full ${
+            loading ? "bg-green-400" : "bg-green-700 hover:bg-green-800"
+          } text-white font-semibold py-2 px-4 rounded-xl transition duration-200`}
         >
-          Login
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         {submitted && (
