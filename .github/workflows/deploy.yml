@@ -10,22 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 🔄 Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: 🧰 Set up Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      - name: 📦 Install Dependencies
+      - name: Install dependencies
         run: npm install
 
-      - name: 🧪 Run Tests (if any)
+      - name: Set fallback .env file
+        run: echo "REACT_APP_PUBLIC_API_URL=http://localhost:5000/api/" > .env
+
+      - name: Run tests (if any)
         run: npm test || echo "No tests defined"
 
-      - name: 🛠️ Build Project
+      - name: Build React app
         run: npm run build
-
-      - name: ✅ CI Passed
-        run: echo "Build completed successfully"
