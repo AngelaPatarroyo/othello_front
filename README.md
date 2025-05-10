@@ -1,70 +1,70 @@
-# Getting Started with Create React App
+# 🎯 Othello Strategy Game
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Play the classic board game Othello online! This web-based version supports dynamic board sizes, player token logic, and full game rules using a React frontend and .NET Core backend API.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## ✨ Features
 
-### `npm start`
+- 🔐 **User Authentication**: Users can register, log in, and are authenticated via JWT tokens.
+- 🎮 **Game Play**: Create a new game and play turn-by-turn with dynamic rules based on board size.
+- 🧠 **Smart Rules Engine**: Validates legal moves, flips opponent tokens, and tracks player turns.
+- 📊 **Leaderboard**: Track the most successful players based on wins.
+- 🛠️ **Admin Tools**: Admin can view all users and all games played.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## 🍍 Tech Stack
 
-### `npm test`
+- **Frontend**: React, React Router, Tailwind CSS
+- **Backend**: [.NET Core API (Othello_API)](https://github.com/AngelaPatarroyo/Othello_API)
+- **Frontend Repo**: [othello_front](https://github.com/AngelaPatarroyo/othello_front)
+- **Deployment**: Netlify (Frontend), Render (Backend)
+- **State Management**: React Context API
+- **Routing**: React Router DOM
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🖥️ Live URLs
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- 🔗 **Frontend Live**: _Coming Soon or your Netlify URL here_
+- 🔗 **Backend Live**: _Coming Soon or your Render URL here_
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## ⚙️ Installation
 
-### `npm run eject`
+To run the project locally:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 1. Clone the repository
+```bash
+git clone https://github.com/AngelaPatarroyo/othello_front.git
+cd othello_front
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+🎲 Game Rules
+Black always starts.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+8×8 board → each player starts with 32 tokens.
+10×10 board → each player starts with 50 tokens.
 
-## Learn More
+You can only place a token on an empty tile adjacent to an opponent’s token.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+A move is valid only if it creates a straight line (in any direction) with one of your tokens on the other side, flipping all opponent tokens in between.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+The goal is to finish the game with more of your color tokens than your opponent.
 
-### Code Splitting
+The game ends when:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+A player has no valid moves, or
 
-### Analyzing the Bundle Size
+A player runs out of tokens
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+src/
+├── components/     # Reusable UI components
+├── context/        # Auth & API context providers
+├── pages/          # Route-level views (Home, Login, Game, etc.)
+├── utils/          # Helper functions
+├── App.jsx         # Main app layout and routing
+└── index.js        # ReactDOM render entry point
