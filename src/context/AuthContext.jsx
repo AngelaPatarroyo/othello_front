@@ -1,23 +1,37 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
+import { jwtDecode } from 'jwt-decode';
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
+  const logoutTimer = useRef(null);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
+  const logout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    if (logoutTimer.current) clearTimeout(logoutTimer.current);
+  };
 
-    if (storedToken && storedUser) {
-      try {
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
-      } catch (err) {
-        console.error('Failed to parse stored user:', err);
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+  const startLogoutTimer = useCallback((token) => {
+    try {
+      const decoded = jwtDecode(token);
+      const expiryTime = decoded.exp * 1000 - Date.now(); // convert to ms
+
+      if (expiryTime > 0) {
+        logoutTimer.current = setTimeout(() => {
+          logout();
+          console.warn('Session expired. User logged out automatically.');
+        }, expiryTime);
+      } else {
+        logout(); // already expired
       }
+    } catch (err) {
+      console.error('Invalid token:', err);
+      logout();
     }
   }, []);
 
@@ -36,7 +50,6 @@ export const AuthProvider = ({ children }) => {
 
       const data = await res.json();
 
-      // Normalize the user keys for consistency
       const normalizedUser = {
         id: data.user.id || data.user.Id,
         userName: data.user.userName || data.user.UserName,
@@ -48,6 +61,7 @@ export const AuthProvider = ({ children }) => {
       setUser(normalizedUser);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(normalizedUser));
+      startLogoutTimer(data.token);
 
       return true;
     } catch (err) {
@@ -56,12 +70,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  };
+  useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('user');
+
+    if (storedToken && storedUser) {
+      try {
+        setToken(storedToken);
+        setUser(JSON.parse(storedUser));
+        startLogoutTimer(storedToken);
+      } catch (err) {
+        console.error('Failed to parse session:', err);
+        logout();
+      }
+    }
+  }, [startLogoutTimer]);
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
